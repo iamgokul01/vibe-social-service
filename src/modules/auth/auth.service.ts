@@ -178,7 +178,9 @@ export class AuthService {
   private setRefreshCookie(response: Response, token: string): void {
     response.cookie(REFRESH_COOKIE, token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: this.configService.get<'lax' | 'strict' | 'none'>(
+        'cookieSameSite',
+      ),
       secure: this.configService.get<boolean>('secureCookies'),
       path: '/api/auth',
       maxAge: this.configService.get<number>('jwt.refreshTtlMs'),
@@ -188,7 +190,9 @@ export class AuthService {
   private clearRefreshCookie(response: Response): void {
     response.clearCookie(REFRESH_COOKIE, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: this.configService.get<'lax' | 'strict' | 'none'>(
+        'cookieSameSite',
+      ),
       secure: this.configService.get<boolean>('secureCookies'),
       path: '/api/auth',
     });

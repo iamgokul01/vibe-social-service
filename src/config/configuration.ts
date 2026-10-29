@@ -15,6 +15,8 @@ export interface JwtConfig {
   refreshTtlMs: number;
 }
 
+export type CookieSameSite = 'lax' | 'strict' | 'none';
+
 export interface AppConfig {
   port: number;
   nodeEnv: string;
@@ -22,6 +24,7 @@ export interface AppConfig {
   corsOrigins: string[];
   trustProxy: boolean;
   secureCookies: boolean;
+  cookieSameSite: CookieSameSite;
   jwt: JwtConfig;
   db: DatabaseConfig;
   throttle: { ttlSeconds: number; limit: number };
@@ -32,9 +35,37 @@ const toBool = (value: string | undefined, fallback = false): boolean => {
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase());
 };
 
+const toSameSite = (
+  value: string | undefined,
+  fallback: CookieSameSite,
+): CookieSameSite => {
+  const normalized = (value ?? '').trim().toLowerCase();
+  if (
+    normalized === 'lax' ||
+    normalized === 'strict' ||
+    normalized === 'none'
+  ) {
+    return normalized;
+  }
+  return fallback;
+};
+
 export default (): AppConfig => {
   const nodeEnv = process.env.NODE_ENV ?? 'development';
   const isProduction = nodeEnv === 'production';
+
+  // A cross-site frontend (for example http://localhost:5173 talking to a
+  // deployed https API) cannot send a SameSite=Lax cookie, so production
+  // defaults to SameSite=None; Secure. Browsers reject None without Secure,
+  // so the secure flag is forced on whenever None is used.
+  const cookieSameSite = toSameSite(
+    process.env.COOKIE_SAME_SITE,
+    isProduction ? 'none' : 'lax',
+  );
+  const secureCookies = toBool(
+    process.env.SECURE_COOKIES,
+    isProduction || cookieSameSite === 'none',
+  );
 
   return {
     port: Number(process.env.PORT ?? 4000),
@@ -45,7 +76,8 @@ export default (): AppConfig => {
       .map((origin) => origin.trim())
       .filter(Boolean),
     trustProxy: toBool(process.env.TRUST_PROXY, isProduction),
-    secureCookies: toBool(process.env.SECURE_COOKIES, isProduction),
+    secureCookies,
+    cookieSameSite,
     jwt: {
       secret: process.env.JWT_SECRET ?? '',
       expiresIn: process.env.JWT_EXPIRES_IN ?? '15m',
