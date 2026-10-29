@@ -6,3 +6,8 @@ coverage/
 *.log
 .DS_Store
 .env.example
+
+# Northflank provisioning state - contains the generated JWT secret and the
+# bootstrap admin password. Never commit this.
+deploy/northflank/.state.json
+deploy/northflank/region-probe.txt
