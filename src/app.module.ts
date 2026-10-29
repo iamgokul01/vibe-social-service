@@ -40,6 +40,9 @@ import { HealthModule } from './health/health.module';
         entities,
         synchronize: configService.get<boolean>('db.synchronize'),
         logging: configService.get<boolean>('db.logging'),
+        ssl: configService.get<boolean>('db.ssl')
+          ? { rejectUnauthorized: false }
+          : undefined,
         extra: { connectionLimit: 10 },
       }),
     }),

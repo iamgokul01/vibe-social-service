@@ -7,6 +7,7 @@ export interface DatabaseConfig {
   synchronize: boolean;
   logging: boolean;
   foreignKeys: boolean;
+  ssl: boolean;
 }
 
 export interface JwtConfig {
@@ -92,6 +93,9 @@ export default (): AppConfig => {
       synchronize: toBool(process.env.DB_SYNCHRONIZE, false),
       logging: toBool(process.env.DB_LOGGING, false),
       foreignKeys: toBool(process.env.DB_FOREIGN_KEYS, true),
+      // Managed MySQL providers (for example Northflank addons) run with
+      // require_secure_transport=ON, so the connection must be encrypted.
+      ssl: toBool(process.env.DB_SSL, false),
     },
     throttle: {
       ttlSeconds: Number(process.env.THROTTLE_TTL ?? 60),

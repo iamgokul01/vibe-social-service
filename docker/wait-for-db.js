@@ -16,6 +16,7 @@ const database = process.env.DB_NAME;
 
 const maxAttempts = Number(process.env.DB_WAIT_ATTEMPTS || 60);
 const retryDelayMs = Number(process.env.DB_WAIT_DELAY_MS || 3000);
+const useSsl = /^(1|true|yes|on)$/i.test(process.env.DB_SSL ?? '');
 
 async function waitForDatabase() {
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -27,6 +28,7 @@ async function waitForDatabase() {
         password,
         database,
         connectTimeout: 5000,
+        ...(useSsl ? { ssl: { rejectUnauthorized: false } } : {}),
       });
       await connection.end();
       console.log(`[entrypoint] database reachable at ${host}:${port}`);

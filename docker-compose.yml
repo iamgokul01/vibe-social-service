@@ -42,6 +42,7 @@ services:
       DB_SYNCHRONIZE: "false"
       DB_LOGGING: ${DB_LOGGING:-false}
       DB_FOREIGN_KEYS: "true"
+      DB_SSL: ${DB_SSL:-false}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-7}

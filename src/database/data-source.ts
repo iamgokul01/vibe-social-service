@@ -41,6 +41,7 @@ export const dataSourceOptions: DataSourceOptions = {
   migrationsTableName: 'migrations',
   synchronize: false,
   logging: appConfig.db.logging,
+  ssl: appConfig.db.ssl ? { rejectUnauthorized: false } : undefined,
   extra: {
     connectionLimit: 10,
   },
